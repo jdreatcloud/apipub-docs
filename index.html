@@ -6,17 +6,81 @@
   <title>EatCloud · API pública de donaciones</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
   <style>
-    body { margin: 0; background: #fafafa; }
-    .ec-bar { background: #1f7a4d; color: #fff; padding: 14px 24px; font: 600 18px/1.3 system-ui, sans-serif; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .ec-bar a { color: #fff; font-weight: 400; font-size: 14px; }
+    /* Paleta EatCloud */
+    :root {
+      --ec-azul: #00b3fe;      /* Azul Brillante */
+      --ec-blanco: #ffffff;
+      --ec-negro: #000000;
+      --ec-fucsia: #ff175f;    /* Fucsia de acción */
+      --ec-verde: #36c5aa;     /* Verde EatCloud */
+      --ec-amarillo: #fac172;  /* Amarillo EatCloud */
+      --ec-naranja: #ff8357;   /* Naranja EatCloud */
+      --ec-purpura: #1d012f;   /* Púrpura EatCloud */
+    }
+
+    body { margin: 0; background: var(--ec-blanco); color: var(--ec-purpura); }
+
+    /* Barra superior */
+    .ec-bar {
+      background: var(--ec-purpura); color: var(--ec-blanco);
+      border-bottom: 5px solid var(--ec-azul);
+      padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .ec-bar .ec-title { font-size: 20px; font-weight: 700; letter-spacing: .2px; }
+    .ec-bar .ec-title span { color: var(--ec-verde); }
+    .ec-btn {
+      background: var(--ec-fucsia); color: var(--ec-blanco); text-decoration: none;
+      font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 999px;
+    }
+    .ec-btn:hover, .ec-btn:focus { background: #e0004b; outline: 3px solid var(--ec-amarillo); outline-offset: 2px; }
+
+    /* Ajustes a Swagger UI */
     .swagger-ui .topbar { display: none; }
-    #ec-error { display: none; max-width: 760px; margin: 40px auto; font: 15px/1.5 system-ui, sans-serif; padding: 16px; border: 1px solid #e0b4b4; background: #fff6f6; }
+    .swagger-ui, .swagger-ui .info .title, .swagger-ui .info p, .swagger-ui .info li,
+    .swagger-ui .opblock-tag, .swagger-ui .opblock .opblock-summary-description,
+    .swagger-ui .markdown p, .swagger-ui .markdown li, .swagger-ui table thead tr th,
+    .swagger-ui .parameter__name, .swagger-ui .response-col_status { color: var(--ec-purpura); }
+    .swagger-ui .info .title small.version-stamp { background: var(--ec-verde); }
+    .swagger-ui .info .title small pre { color: var(--ec-purpura); }
+    .swagger-ui a, .swagger-ui .info a { color: #0078b0; }
+    .swagger-ui .info blockquote { border-left: 4px solid var(--ec-amarillo); margin-left: 0; padding-left: 12px; }
+    .swagger-ui .markdown code, .swagger-ui .renderedMarkdown code { color: var(--ec-purpura); background: #e6f7ff; }
+
+    /* Secciones (tags) */
+    .swagger-ui .opblock-tag { border-bottom: 2px solid var(--ec-azul); }
+
+    /* Bloques POST */
+    .swagger-ui .opblock.opblock-post { border-color: var(--ec-verde); background: rgba(54,197,170,.08); }
+    .swagger-ui .opblock.opblock-post .opblock-summary { border-color: var(--ec-verde); }
+    .swagger-ui .opblock.opblock-post .opblock-summary-method { background: var(--ec-verde); color: var(--ec-purpura); }
+    .swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span:after { background: var(--ec-verde); }
+
+    /* Selector de servidor y botones */
+    .swagger-ui .scheme-container { box-shadow: none; border-top: 1px solid #e6e1ea; border-bottom: 1px solid #e6e1ea; }
+    .swagger-ui .btn.authorize { color: var(--ec-purpura); border-color: var(--ec-azul); }
+    .swagger-ui .btn.authorize svg { fill: var(--ec-azul); }
+    .swagger-ui select { border-color: var(--ec-azul); }
+
+    /* Códigos de respuesta */
+    .swagger-ui .response-col_status { font-weight: 700; }
+    .swagger-ui .responses-table .response[data-code^="4"] .response-col_status,
+    .swagger-ui .responses-table .response[data-code="default"] .response-col_status { color: #c4003f; }
+
+    /* Modelos */
+    .swagger-ui section.models { border-color: var(--ec-azul); }
+    .swagger-ui section.models h4 { color: var(--ec-purpura); }
+
+    #ec-error {
+      display: none; max-width: 760px; margin: 40px auto; font: 15px/1.5 system-ui, sans-serif;
+      padding: 16px; border-left: 5px solid var(--ec-naranja); background: #fff3ee; color: var(--ec-purpura);
+    }
   </style>
 </head>
 <body>
   <div class="ec-bar">
-    <span>EatCloud · API pública de donaciones</span>
-    <a href="openapi.yaml" download>Descargar openapi.yaml (importable en Insomnia o Postman)</a>
+    <div class="ec-title">EatCloud · <span>API pública de donaciones</span></div>
+    <a class="ec-btn" href="openapi.yaml" download>Descargar openapi.yaml</a>
   </div>
   <div id="ec-error">
     No se pudo cargar <code>openapi.yaml</code>. Si abrió este archivo con doble clic desde su computador,
@@ -34,7 +98,6 @@
         defaultModelsExpandDepth: 0,
         tryItOutEnabled: false,
         supportedSubmitMethods: [],
-        onComplete: function () {},
         onFailure: function () { document.getElementById('ec-error').style.display = 'block'; }
       });
       fetch('openapi.yaml', { method: 'HEAD' }).catch(function () {
