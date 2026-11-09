@@ -77,6 +77,8 @@
 
     /* Colores en Swagger UI: azul como acento principal, secundarios con moderación */
     .swagger-ui .topbar { display: none; }
+    /* Sin "Try it out": se ocultan el botón Authorize y los candados de cada operación */
+    .swagger-ui .auth-wrapper, .swagger-ui .authorization__btn { display: none !important; }
     .swagger-ui a, .swagger-ui .info a { color: var(--ec-azul-texto); }
     .swagger-ui .info .title small.version-stamp { background: var(--ec-azul); }
     .swagger-ui .info .title small pre { color: var(--ec-negro); }
