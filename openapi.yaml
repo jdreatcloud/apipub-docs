@@ -10,6 +10,11 @@ info:
     kilogramos y valor al costo en moneda local. Con estos datos EatCloud genera
     indicadores operativos y emite certificados de donación.
 
+    > **NOTA:** las URLs de las operaciones se muestran con los sufijos `#create_donation`,
+    > `#consulta` y `#gestion_verificar_codigo` solo para separarlas en esta documentación y
+    > cumplir con el formato OAS (OpenAPI). La URL real es la misma para todas; el sufijo
+    > no se envía al servidor.
+
     ## Cómo funciona
 
     - **Un solo endpoint, un solo método:** todas las operaciones se hacen con `POST`
@@ -37,8 +42,6 @@ info:
     con el detalle en `err_msg`. Los errores responden con HTTP **400**.
     La verificación de código de gestión usa `"ok"` y `"message"` en lugar de `"op"` y `"err_msg"`.
 
-    > Las URLs de las operaciones se muestran con un sufijo `#operacion` solo para separarlas
-    > en esta documentación. La URL real es la misma para todas; el sufijo no se envía al servidor.
   contact:
     name: Soporte EatCloud
 
