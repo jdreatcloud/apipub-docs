@@ -102,7 +102,6 @@ paths:
                       eatc-odd_unit_weight_kg: "0.028"
                       eatc-unit_cost: "9334"
                       eatc-VAT_percentage: "5"
-                      eatc_closer_expiration_date: "2026-10-23"
                     - eatc-pod_id: "I08"
                       eatc-odd_id: "4"
                       eatc-odd_name: "ALAS ADOBADAS 750 G"
@@ -110,7 +109,6 @@ paths:
                       eatc-odd_unit_weight_kg: "0.75"
                       eatc-unit_cost: "1"
                       eatc-VAT_percentage: "0"
-                      eatc_closer_expiration_date: "2026-10-23"
               completo:
                 summary: Todos los campos
                 value:
@@ -218,7 +216,7 @@ paths:
                   value:
                     ts: "261020214734"
                     op: false
-                    err_msg: "incomplete_data:eatc_closer_expiration_date"
+                    err_msg: "incomplete_data:eatc-pod_id"
                     err_num: ""
                 usuario_no_existe:
                   summary: Usuario no existente
@@ -459,7 +457,6 @@ components:
         - eatc-odd_unit_weight_kg
         - eatc-unit_cost
         - eatc-VAT_percentage
-        - eatc_closer_expiration_date
       properties:
         eatc-pod_id:
           type: string
@@ -492,7 +489,7 @@ components:
         eatc_closer_expiration_date:
           type: string
           format: date
-          description: Fecha de vencimiento del producto, formato `AAAA-MM-DD`. La API la exige; si falta responde `incomplete_data:eatc_closer_expiration_date`.
+          description: Fecha de vencimiento del producto, formato `AAAA-MM-DD` (opcional).
           example: "2026-10-23"
         origin_odds_typology_a:
           type: string
