@@ -4,19 +4,111 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EatCloud · API pública de donaciones</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Encode+Sans+Semi+Condensed:wght@500;600;700&family=Open+Sans:wght@400;600&family=Roboto+Mono:wght@500&display=swap">
   <style>
-    body { margin: 0; background: #fafafa; }
-    .ec-bar { background: #1f7a4d; color: #fff; padding: 14px 24px; font: 600 18px/1.3 system-ui, sans-serif; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .ec-bar a { color: #fff; font-weight: 400; font-size: 14px; }
+    /* Sistema gráfico EatCloud — https://www.eatcloud.com/eatcloud-brand/sistema-grafico-eatcloud/
+       Primarios: azul brillante, blanco, negro. Acción: fucsia (solo llamados a la acción).
+       Secundarios con moderación. Tipografía: Encode Sans Semi Condensed (títulos),
+       Open Sans (texto), Roboto Mono 500 14px (código). */
+    :root {
+      --ec-azul: #00b3fe;        /* Azul Brillante (primario) */
+      --ec-blanco: #ffffff;      /* Blanco (primario) */
+      --ec-negro: #000000;       /* Negro (primario) */
+      --ec-fucsia: #ff175f;      /* Fucsia de acción */
+      --ec-azul-claro: #61d8e9;  /* Azul Claro EatCloud (secundario) */
+      --ec-amarillo: #fac172;    /* Amarillo EatCloud (secundario) */
+      --ec-naranja: #ff8357;     /* Naranja EatCloud (secundario) */
+      --ec-azul-texto: #00719f;  /* Azul brillante oscurecido solo para enlaces (contraste AA) */
+      --ec-titulos: "Encode Sans Semi Condensed", "Open Sans", sans-serif;
+      --ec-texto: "Open Sans", system-ui, sans-serif;
+      --ec-codigo: "Roboto Mono", ui-monospace, monospace;
+    }
+
+    body { margin: 0; background: var(--ec-blanco); color: var(--ec-negro); font-family: var(--ec-texto); }
+
+    /* Barra superior: fondo claro para el logo a color, alineado arriba (regla para sitios web) */
+    .ec-bar {
+      background: var(--ec-blanco); border-bottom: 4px solid var(--ec-azul);
+      padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .ec-brand { display: flex; align-items: center; gap: 18px; }
+    .ec-logo { height: 52px; width: auto; display: block; }
+    .ec-title {
+      font-family: var(--ec-titulos); font-weight: 700; font-size: 21px; line-height: 25px;
+      color: var(--ec-negro); border-left: 2px solid var(--ec-azul); padding-left: 18px;
+    }
+    .ec-btn {
+      background: var(--ec-fucsia); color: var(--ec-blanco); text-decoration: none;
+      font-family: var(--ec-texto); font-weight: 600; font-size: 16px; line-height: 34px;
+      padding: 0 20px; border-radius: 999px;
+    }
+    .ec-btn:hover { background: #e0004b; }
+    .ec-btn:focus-visible { outline: 3px solid var(--ec-negro); outline-offset: 2px; }
+
+    /* Tipografía en Swagger UI */
+    .swagger-ui, .swagger-ui .info p, .swagger-ui .info li, .swagger-ui .markdown p, .swagger-ui .markdown li,
+    .swagger-ui .renderedMarkdown p, .swagger-ui table, .swagger-ui .parameter__name, .swagger-ui .parameter__type,
+    .swagger-ui .opblock .opblock-summary-description, .swagger-ui .response-col_description,
+    .swagger-ui .model, .swagger-ui .tab li, .swagger-ui label, .swagger-ui select {
+      font-family: var(--ec-texto); color: var(--ec-negro);
+    }
+    .swagger-ui .info p, .swagger-ui .info li, .swagger-ui .markdown p, .swagger-ui .markdown li,
+    .swagger-ui .renderedMarkdown p { font-size: 16px; line-height: 1.7; }
+    .swagger-ui .info .title, .swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3,
+    .swagger-ui .markdown h1, .swagger-ui .markdown h2, .swagger-ui .opblock-tag,
+    .swagger-ui section.models h4, .swagger-ui .opblock-section-header h4, .swagger-ui .responses-inner h4 {
+      font-family: var(--ec-titulos); color: var(--ec-negro);
+    }
+    .swagger-ui .info .title { font-size: 28px; line-height: 34px; font-weight: 700; }
+    .swagger-ui .info h2, .swagger-ui .markdown h2 { font-size: 21px; line-height: 25px; font-weight: 700; }
+    .swagger-ui .opblock-tag { font-size: 21px; font-weight: 600; }
+    .swagger-ui code, .swagger-ui pre, .swagger-ui .microlight, .swagger-ui .opblock-summary-path,
+    .swagger-ui .opblock-summary-path a, .swagger-ui .model-title, .swagger-ui .prop-type {
+      font-family: var(--ec-codigo) !important; font-weight: 500;
+    }
+    .swagger-ui .markdown code, .swagger-ui .renderedMarkdown code {
+      font-size: 14px; color: var(--ec-negro); background: #e5f7ff; padding: 1px 5px; border-radius: 4px;
+    }
+
+    /* Colores en Swagger UI: azul como acento principal, secundarios con moderación */
     .swagger-ui .topbar { display: none; }
-    #ec-error { display: none; max-width: 760px; margin: 40px auto; font: 15px/1.5 system-ui, sans-serif; padding: 16px; border: 1px solid #e0b4b4; background: #fff6f6; }
+    .swagger-ui a, .swagger-ui .info a { color: var(--ec-azul-texto); }
+    .swagger-ui .info .title small.version-stamp { background: var(--ec-azul); }
+    .swagger-ui .info .title small pre { color: var(--ec-negro); }
+    .swagger-ui .info .title small:not(.version-stamp) { background: var(--ec-negro); }
+    .swagger-ui .info .title small:not(.version-stamp) pre { color: var(--ec-blanco); }
+    .swagger-ui .info blockquote { border-left: 4px solid var(--ec-amarillo); margin-left: 0; padding-left: 14px; }
+    .swagger-ui .opblock-tag { border-bottom: 1px solid #d9d9d9; }
+    .swagger-ui .opblock.opblock-post { border-color: var(--ec-azul); background: #f0faff; }
+    .swagger-ui .opblock.opblock-post .opblock-summary { border-color: var(--ec-azul); }
+    .swagger-ui .opblock.opblock-post .opblock-summary-method {
+      background: var(--ec-azul); color: var(--ec-negro); font-family: var(--ec-titulos); font-weight: 700;
+    }
+    .swagger-ui .opblock.opblock-post .tab-header .tab-item.active h4 span:after { background: var(--ec-azul); }
+    .swagger-ui .scheme-container { box-shadow: none; border-bottom: 1px solid #d9d9d9; }
+    .swagger-ui .btn.authorize { color: var(--ec-negro); border-color: var(--ec-azul); }
+    .swagger-ui .btn.authorize svg { fill: var(--ec-azul-texto); }
+    .swagger-ui select { border-color: var(--ec-azul); }
+    .swagger-ui .response-col_status { font-weight: 600; color: var(--ec-negro); }
+    .swagger-ui .responses-table .response[data-code^="4"] .response-col_status,
+    .swagger-ui .responses-table .response[data-code="default"] .response-col_status { color: #c4003f; }
+    .swagger-ui section.models { border-color: #d9d9d9; }
+
+    #ec-error {
+      display: none; max-width: 760px; margin: 40px auto; font: 16px/1.6 var(--ec-texto);
+      padding: 16px; border-left: 5px solid var(--ec-naranja); background: #fff3ee; color: var(--ec-negro);
+    }
   </style>
 </head>
 <body>
   <div class="ec-bar">
-    <span>EatCloud · API pública de donaciones</span>
-    <a href="openapi.yaml" download>Descargar openapi.yaml (importable en Insomnia o Postman)</a>
+    <div class="ec-brand"><img src="logo.png" alt="EatCloud" class="ec-logo"><div class="ec-title">API pública de donaciones</div></div>
+    <a class="ec-btn" href="openapi.yaml" download>Descargar openapi.yaml</a>
   </div>
   <div id="ec-error">
     No se pudo cargar <code>openapi.yaml</code>. Si abrió este archivo con doble clic desde su computador,
@@ -34,7 +126,6 @@
         defaultModelsExpandDepth: 0,
         tryItOutEnabled: false,
         supportedSubmitMethods: [],
-        onComplete: function () {},
         onFailure: function () { document.getElementById('ec-error').style.display = 'block'; }
       });
       fetch('openapi.yaml', { method: 'HEAD' }).catch(function () {
