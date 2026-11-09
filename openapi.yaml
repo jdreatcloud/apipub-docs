@@ -1,0 +1,650 @@
+openapi: 3.0.3
+info:
+  title: EatCloud · API pública de donaciones (pbapi)
+  version: "3.0.0"
+  description: |
+    API para **crear anuncios de donación** y **consultar su gestión** en EatCloud,
+    para una cuenta usuario (`cua_user`) vinculada a una cuenta maestra (`cua_master`).
+
+    Cada detalle de un anuncio registra un producto donado con su cantidad, peso en
+    kilogramos y valor al costo en moneda local. Con estos datos EatCloud genera
+    indicadores operativos y emite certificados de donación.
+
+    ## Cómo funciona
+
+    - **Un solo endpoint, un solo método:** todas las operaciones se hacen con `POST`
+      a la misma URL. Lo que cambia es el campo `_operation` del body.
+    - **Formato:** el body se envía en JSON (`Content-Type: application/json`).
+    - **Autenticación:** Basic Auth con el usuario y la contraseña que EatCloud entrega
+      a cada cliente **por un canal privado**. Las credenciales no se publican en esta página.
+    - **Un punto de donación por petición:** cada solicitud de creación debe incluir
+      productos de un único punto de donación (`eatc-pod_id`), usando los códigos
+      registrados durante la incorporación de puntos en la plataforma.
+
+    ## Ambientes
+
+    | Ambiente | URL base |
+    |---|---|
+    | Desarrollo | `https://devdonantes.eatcloud.info/pbapi/{cua_master}/{cua_user}` |
+    | Producción | `https://donantes.eatcloud.info/pbapi/{cua_master}/{cua_user}` |
+
+    El ambiente (dev o prd) se determina por el dominio del servidor.
+    `cua_master` y `cua_user` los asigna EatCloud a cada cliente.
+
+    ## Cómo leer las respuestas
+
+    En general, una respuesta exitosa trae `"op": true` y una fallida `"op": false`
+    con el detalle en `err_msg`. Los errores responden con HTTP **400**.
+    La verificación de código de gestión usa `"ok"` y `"message"` en lugar de `"op"` y `"err_msg"`.
+
+    > Las URLs de las operaciones se muestran con un sufijo `#operacion` solo para separarlas
+    > en esta documentación. La URL real es la misma para todas; el sufijo no se envía al servidor.
+  contact:
+    name: Soporte EatCloud
+
+servers:
+  - url: https://devdonantes.eatcloud.info/pbapi
+    description: Desarrollo
+  - url: https://donantes.eatcloud.info/pbapi
+    description: Producción
+
+security:
+  - basicAuth: []
+
+tags:
+  - name: Creación de donaciones
+    description: Crear anuncios de donación con uno o varios productos.
+  - name: Consulta de donaciones
+    description: Consultar donaciones según su estado de gestión, por rango de fechas o por código.
+  - name: Verificación de gestión
+    description: Comprobar con el código de verificación que una donación programada fue gestionada por el recolector.
+
+paths:
+  /{cua_master}/{cua_user}#create_donation:
+    post:
+      tags: [Creación de donaciones]
+      operationId: create_donation
+      summary: Crear anuncio de donación
+      description: |
+        Crea un anuncio de donación con uno o varios productos (`_data`) de un mismo punto de donación.
+
+        **Qué revisar en la respuesta exitosa:**
+
+        | Bloque | Condición de éxito |
+        |---|---|
+        | Encabezado (`encabezado`) | `op = true` y `cont > 0` |
+        | Detalles (`detalles`) | `op = true` y `cont > 0` |
+        | Match (`encabezado._match.match[0]`) | `op = true` y `cont > 0` |
+
+        **Nota:** si el `cont` del match es 0, el anuncio se crea pero **no es visible para los beneficiarios**.
+      parameters:
+        - $ref: '#/components/parameters/cua_master'
+        - $ref: '#/components/parameters/cua_user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDonationRequest'
+            examples:
+              minimo:
+                summary: Campos obligatorios
+                value:
+                  _operation: create_donation
+                  _data:
+                    - eatc-pod_id: "I08"
+                      eatc-odd_id: "3"
+                      eatc-odd_name: "AJO EN POLVO 28 G"
+                      eatc-odd_original_quantity: "7"
+                      eatc-odd_unit_weight_kg: "0.028"
+                      eatc-unit_cost: "9334"
+                      eatc-VAT_percentage: "5"
+                      eatc_closer_expiration_date: "2026-10-23"
+                    - eatc-pod_id: "I08"
+                      eatc-odd_id: "4"
+                      eatc-odd_name: "ALAS ADOBADAS 750 G"
+                      eatc-odd_original_quantity: "5"
+                      eatc-odd_unit_weight_kg: "0.75"
+                      eatc-unit_cost: "1"
+                      eatc-VAT_percentage: "0"
+                      eatc_closer_expiration_date: "2026-10-23"
+              completo:
+                summary: Todos los campos
+                value:
+                  _operation: create_donation
+                  eatc-dona_header_code: "isimoI0820260131202524"
+                  eatc-doc: "52730283000"
+                  _data:
+                    - eatc-pod_id: "I08"
+                      eatc-odd_id: "3"
+                      eatc-odd_name: "AJO EN POLVO 28 G"
+                      eatc-odd_original_quantity: "7"
+                      eatc-odd_unit_weight_kg: "0.028"
+                      eatc-unit_cost: "1"
+                      eatc-VAT_percentage: "0"
+                      origin_odds_typology_a: "ta"
+                      origin_odds_typology_b: "tb"
+                      origin_odds_typology_c: "tc"
+                      eatc_lote: ""
+                      eatc_closer_expiration_date: "2026-10-23"
+                    - eatc-pod_id: "I08"
+                      eatc-odd_id: "4"
+                      eatc-odd_name: "ALAS ADOBADAS 750 G"
+                      eatc-odd_original_quantity: "5"
+                      eatc-odd_unit_weight_kg: "0.75"
+                      eatc-unit_cost: "1"
+                      eatc-VAT_percentage: "0"
+                      origin_odds_typology_a: "ta2"
+                      origin_odds_typology_b: "tb2"
+                      origin_odds_typology_c: "tc2"
+                      eatc_lote: ""
+                      eatc_closer_expiration_date: "2026-03-10"
+      responses:
+        "200":
+          description: Anuncio creado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDonationResponse'
+              example:
+                ts: "261020215018"
+                op: true
+                detalles:
+                  op: true
+                  cont: 2
+                  last: "459800"
+                encabezado:
+                  ts: "261020215019"
+                  op: true
+                  cont: 1
+                  _match:
+                    clasificacion:
+                      - cuamaster: "abaco"
+                        anuncio: "isimoI0820260131202524"
+                        donor: "isimo"
+                        clasificacion: "abaco_general_nacional"
+                        lat: "6.260882765137926"
+                        lon: "-75.59756471393436"
+                        eatc-publication_datetime: "2026-10-20 21:50:20"
+                        pod_id: "I08"
+                        pod_name: "CALASANZ MEDELLIN "
+                        ciudad: "Medellín"
+                        kg_original: "3.946"
+                        kg_total: "3.946"
+                        cost_original: "65343"
+                        dona_typology_a: ""
+                    update:
+                      - upd: "abaco_general_nacional"
+                        res:
+                          op: true
+                          cont: 1
+                    alerta: []
+                    match:
+                      - ts: "261020215021"
+                        op: true
+                        cont: 320
+                        mem: 3.56
+                        time: "00:00:01"
+                _pesosexc:
+                  cont: 0
+                  res: "inactive"
+        "400":
+          description: |
+            La petición no se procesó (`op: false`). El motivo viene en `err_msg`.
+
+            | Caso | `err_msg` |
+            |---|---|
+            | Punto de donación no existe o está inactivo | `No existe el pod id o el status es 0: <pod_id>` |
+            | Falta un campo obligatorio | `incomplete_data:<campo>` |
+            | Usuario no existe | `Username not found.` |
+            | Contraseña inválida | `The credentials provided invalid.` |
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                pod_no_existe:
+                  summary: Punto de donación no existente
+                  value:
+                    ts: "261020220104"
+                    op: false
+                    err_msg: "No existe el pod id o el status es 0: sd44"
+                    err_num: ""
+                campos_incompletos:
+                  summary: Campos incompletos
+                  value:
+                    ts: "261020214734"
+                    op: false
+                    err_msg: "incomplete_data:eatc_closer_expiration_date"
+                    err_num: ""
+                usuario_no_existe:
+                  summary: Usuario no existente
+                  value:
+                    ts: "261020220154"
+                    op: false
+                    err_msg: "Username not found."
+                    err_num: ""
+                contrasena_invalida:
+                  summary: Contraseña inválida
+                  value:
+                    ts: "261020220236"
+                    op: false
+                    err_msg: "The credentials provided invalid."
+                    err_num: ""
+
+  /{cua_master}/{cua_user}#consulta:
+    post:
+      tags: [Consulta de donaciones]
+      operationId: consultar_donaciones
+      summary: Consultar donaciones por estado de gestión
+      description: |
+        Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo
+        reportado por el donante con lo verificado por el beneficiario:
+        `odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`
+        y `original_cost` vs `total_cost`.
+
+        **Valores de `_operation` y estados que devuelve cada uno:**
+
+        | `_operation` | Estados incluidos |
+        |---|---|
+        | `gestion_exitosa` | Recibido, Pre-certificado, Certificado |
+        | `gestion_no_exitosa` | Cancelado, No entregado |
+        | `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |
+
+        **Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios
+        códigos de donación en `eatc-code`.
+      parameters:
+        - $ref: '#/components/parameters/cua_master'
+        - $ref: '#/components/parameters/cua_user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultaRequest'
+            examples:
+              por_fechas:
+                summary: Por rango de fechas
+                value:
+                  _operation: gestion_pendiente
+                  _data:
+                    - fecha_inicial: "2022-01-01"
+                      fecha_final: "2024-11-01"
+              por_codigo:
+                summary: Por código de donación
+                value:
+                  _operation: gestion_pendiente
+                  _data:
+                    - eatc-code: "isimoI0820260131202524"
+      responses:
+        "200":
+          description: Donaciones encontradas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultaResponse'
+              example:
+                res:
+                  - code: "isimoI0820260131202524"
+                    original_weight_kg: "3.946"
+                    original_cost: "65343"
+                    total_weight_kg: "3.946"
+                    total_cost: "65343"
+                    doc: "52730283000"
+                    state: "announced"
+                    publication_date: "2026-10-20"
+                    publication_datetime: "2026-10-20 21:50:20"
+                    pod_id: "I08"
+                    pod_name: "CALASANZ MEDELLIN "
+                    receipt_datetime: "0000-00-00 00:00:00"
+                    code_verification_datetime: "0000-00-00 00:00:00"
+                    donation_manager_code: ""
+                    donation_manager_name: ""
+                    detalles:
+                      - unit_cost: "9334"
+                        odd_original_quantity: "7"
+                        odd_quantity: "7"
+                        odd_name: "AJO EN POLVO 28 G"
+                        odd_id: "3"
+                        odd_unit_weight_kg: "0.028"
+        "400":
+          description: "La petición no se procesó (`op: false`). Errores de autenticación iguales a los de creación."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /{cua_master}/{cua_user}#gestion_verificar_codigo:
+    post:
+      tags: [Verificación de gestión]
+      operationId: gestion_verificar_codigo
+      summary: Verificar código de gestión
+      description: |
+        Permite al donante comprobar, con el código de verificación, que una donación
+        programada (`scheduled`) fue gestionada correctamente por el recolector.
+
+        Ambos campos de `_data` son obligatorios. Si falta alguno, la API responde
+        `incomplete_data:<campo>`.
+
+        **Respuestas posibles:**
+
+        | Caso | `ok` | `message` |
+        |---|---|---|
+        | Donación gestionada correctamente | `true` | `dona_management_verification_code_OK` |
+        | La donación no existe, no está en `scheduled` o el código es incorrecto | `false` | `donation_scheduled_does_not_exist_or_incorret_ver_code` |
+        | La donación no quedó en estado `delivered` o `received` | `false` | `error_dona_management_verification_code` |
+        | Error interno del servicio de verificación | `false` | `error_activepieces_no_response` |
+
+        En todos los casos `data` incluye `ambiente`, `cua_master`, `fecha_hora` y `codigo_donacion`.
+        En caso de éxito incluye además: placa, recolector y su documento de identidad, `POD_id`,
+        beneficiario, `estado_donacion`, `estado3_donacion` y fecha programada de recolección.
+      parameters:
+        - $ref: '#/components/parameters/cua_master'
+        - $ref: '#/components/parameters/cua_user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificarCodigoRequest'
+            example:
+              _operation: gestion_verificar_codigo
+              _data:
+                - codigo_donacion: "00002601054047"
+                  codigo_verificacion: "7309875EDK153"
+      responses:
+        "200":
+          description: Respuesta de la verificación. Revise `ok` y `message`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificarCodigoResponse'
+              examples:
+                exito:
+                  summary: Donación gestionada correctamente
+                  value:
+                    ok: true
+                    data:
+                      placa: "EDK153"
+                      POD_id: "4047"
+                      ambiente: "dev"
+                      cua_master: "abaco"
+                      fecha_hora: "2026-11-03 11:45:24"
+                      recolector: "NOMBRE DEL RECOLECTOR"
+                      beneficiario: "Fundación beneficiaria"
+                      codigo_donacion: "00002601054047"
+                      estado_donacion: "delivered"
+                      estado3_donacion: "Verificado"
+                      doc_id_Recolector: "7309875"
+                      fecha_programda_recoleccion: "2026-01-06 09:00:00"
+                    message: "dona_management_verification_code_OK"
+                    management_verification_code: true
+                codigo_incorrecto:
+                  summary: No existe, no está programada o código incorrecto
+                  value:
+                    ok: false
+                    data:
+                      ambiente: "dev"
+                      cua_master: "abaco"
+                      fecha_hora: "2026-11-03 11:45:24"
+                      codigo_donacion: "00002601054047"
+                    message: "donation_scheduled_does_not_exist_or_incorret_ver_code"
+        default:
+          description: "Otros errores (`ok: false`). Ver la tabla de respuestas en la descripción."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificarCodigoResponse'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Usuario y contraseña entregados por EatCloud a cada cliente por canal privado.
+
+  parameters:
+    cua_master:
+      name: cua_master
+      in: path
+      required: true
+      description: Cuenta maestra asignada por EatCloud.
+      schema:
+        type: string
+        example: abaco
+    cua_user:
+      name: cua_user
+      in: path
+      required: true
+      description: Cuenta usuario (donante) asignada por EatCloud.
+      schema:
+        type: string
+        example: isimo
+
+  schemas:
+    CreateDonationRequest:
+      type: object
+      required: [_operation, _data]
+      properties:
+        _operation:
+          type: string
+          enum: [create_donation]
+          description: Siempre `create_donation`.
+        eatc-dona_header_code:
+          type: string
+          description: Código de la donación (opcional).
+          example: isimoI0820260131202524
+        eatc-doc:
+          type: string
+          description: Documento o número de soporte/factura asociado a la donación.
+          example: "52730283000"
+        _data:
+          type: array
+          minItems: 1
+          description: Uno o varios productos, todos del mismo punto de donación.
+          items:
+            $ref: '#/components/schemas/DonationItem'
+
+    DonationItem:
+      type: object
+      description: Los valores numéricos se envían como texto, como en los ejemplos.
+      required:
+        - eatc-pod_id
+        - eatc-odd_id
+        - eatc-odd_name
+        - eatc-odd_original_quantity
+        - eatc-odd_unit_weight_kg
+        - eatc-unit_cost
+        - eatc-VAT_percentage
+        - eatc_closer_expiration_date
+      properties:
+        eatc-pod_id:
+          type: string
+          description: Código del punto de donación o almacén desde el cual se genera la donación. Si no lo conoce, solicítelo al equipo de soporte de EatCloud.
+          example: I08
+        eatc-odd_id:
+          type: string
+          description: Código del producto o artículo donado.
+          example: "3"
+        eatc-odd_name:
+          type: string
+          description: Nombre del producto o artículo donado.
+          example: AJO EN POLVO 28 G
+        eatc-odd_original_quantity:
+          type: string
+          description: Cantidad donada. Número entero.
+          example: "7"
+        eatc-odd_unit_weight_kg:
+          type: string
+          description: Peso unitario del artículo en kilogramos. Número decimal con punto.
+          example: "0.028"
+        eatc-unit_cost:
+          type: string
+          description: Valor unitario al costo en moneda local. Número decimal con punto.
+          example: "9334"
+        eatc-VAT_percentage:
+          type: string
+          description: Porcentaje de IVA aplicable al producto. Número entero (0, 5, 19…).
+          example: "19"
+        eatc_closer_expiration_date:
+          type: string
+          format: date
+          description: Fecha de vencimiento del producto, formato `AAAA-MM-DD`. La API la exige; si falta responde `incomplete_data:eatc_closer_expiration_date`.
+          example: "2026-10-23"
+        origin_odds_typology_a:
+          type: string
+          description: Primera clasificación libre del artículo (opcional).
+        origin_odds_typology_b:
+          type: string
+          description: Segunda clasificación libre del artículo (opcional).
+        origin_odds_typology_c:
+          type: string
+          description: Tercera clasificación libre del artículo (opcional).
+        eatc_lote:
+          type: string
+          description: Lote al que pertenece el artículo (opcional).
+
+    CreateDonationResponse:
+      type: object
+      properties:
+        ts:
+          type: string
+          description: Marca de tiempo de la respuesta.
+        op:
+          type: boolean
+          description: "`true` si la operación fue exitosa."
+        detalles:
+          type: object
+          description: Resultado de la creación de los detalles (productos).
+          properties:
+            op: { type: boolean }
+            cont: { type: integer, description: Detalles creados. }
+            last: { type: string, description: Identificador del último detalle creado. }
+        encabezado:
+          type: object
+          description: Resultado de la creación del encabezado del anuncio y de su asignación (match).
+          properties:
+            ts: { type: string }
+            op: { type: boolean }
+            cont: { type: integer, description: Encabezados creados. }
+            _match:
+              type: object
+              description: Clasificación del anuncio y búsqueda de beneficiarios. Si `match[0].cont` es 0, el anuncio no es visible para los beneficiarios.
+        _pesosexc:
+          type: object
+          description: Uso interno.
+
+    ConsultaRequest:
+      type: object
+      required: [_operation, _data]
+      properties:
+        _operation:
+          type: string
+          enum: [gestion_exitosa, gestion_no_exitosa, gestion_pendiente]
+          description: Estado de gestión a consultar.
+        _data:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            properties:
+              fecha_inicial:
+                type: string
+                format: date
+                description: Fecha inicial `AAAA-MM-DD`. Obligatoria si no se envía `eatc-code`.
+              fecha_final:
+                type: string
+                format: date
+                description: Fecha final `AAAA-MM-DD`. Obligatoria si no se envía `eatc-code`.
+              eatc-code:
+                type: string
+                description: Uno o varios códigos de donación separados por coma. Obligatorio si no se envía el rango de fechas.
+
+    ConsultaResponse:
+      type: object
+      properties:
+        res:
+          type: array
+          items:
+            $ref: '#/components/schemas/Donacion'
+
+    Donacion:
+      type: object
+      properties:
+        code: { type: string, description: Código único de la donación. }
+        original_weight_kg: { type: string, description: Peso total (kg) reportado originalmente por el donante. }
+        original_cost: { type: string, description: Costo total reportado originalmente por el donante. }
+        total_weight_kg: { type: string, description: Peso total (kg) verificado por el beneficiario. }
+        total_cost: { type: string, description: Costo total verificado por el beneficiario. }
+        doc: { type: string, description: Documento o número de soporte/factura asociado a la donación. }
+        state: { type: string, description: "Estado de la donación (p. ej. `announced`)." }
+        publication_date: { type: string, description: Fecha de publicación. }
+        publication_datetime: { type: string, description: Fecha y hora exactas de publicación. }
+        pod_id: { type: string, description: Código del punto de donación. }
+        pod_name: { type: string, description: Nombre del punto de donación. }
+        receipt_datetime: { type: string, description: "Fecha y hora en que el beneficiario recibió la donación (`0000-00-00 00:00:00` si aún no)." }
+        code_verification_datetime: { type: string, description: Fecha y hora en que se verificó el código de entrega. }
+        donation_manager_code: { type: string, description: Código del gestor/beneficiario que gestiona o recoge la donación. }
+        donation_manager_name: { type: string, description: Nombre del gestor/beneficiario. }
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              odd_id: { type: string, description: Código del producto. }
+              odd_name: { type: string, description: Nombre del producto. }
+              odd_original_quantity: { type: string, description: Cantidad reportada por el donante. }
+              odd_quantity: { type: string, description: Cantidad verificada por el beneficiario. }
+              odd_unit_weight_kg: { type: string, description: Peso de una unidad en kg. }
+              unit_cost: { type: string, description: Costo de una unidad. }
+
+    VerificarCodigoRequest:
+      type: object
+      required: [_operation, _data]
+      properties:
+        _operation:
+          type: string
+          enum: [gestion_verificar_codigo]
+        _data:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            required: [codigo_donacion, codigo_verificacion]
+            properties:
+              codigo_donacion:
+                type: string
+                description: Código de la donación.
+              codigo_verificacion:
+                type: string
+                description: Código de verificación entregado por el recolector.
+
+    VerificarCodigoResponse:
+      type: object
+      properties:
+        ok: { type: boolean, description: "`true` si la donación fue gestionada correctamente." }
+        message: { type: string, description: Código del resultado. }
+        management_verification_code: { type: boolean }
+        data:
+          type: object
+          properties:
+            ambiente: { type: string, description: "`dev` o `prd`." }
+            cua_master: { type: string }
+            fecha_hora: { type: string }
+            codigo_donacion: { type: string }
+            placa: { type: string, description: Placa del vehículo del recolector. }
+            recolector: { type: string, description: Nombre del recolector. }
+            doc_id_Recolector: { type: string, description: Documento de identidad del recolector. }
+            POD_id: { type: string, description: Punto de donación. }
+            beneficiario: { type: string }
+            estado_donacion: { type: string }
+            estado3_donacion: { type: string }
+            fecha_programda_recoleccion: { type: string, description: Fecha programada de recolección. }
+
+    Error:
+      type: object
+      properties:
+        ts: { type: string, description: Marca de tiempo. }
+        op: { type: boolean, example: false }
+        err_msg: { type: string, description: Motivo del error. }
+        err_num: { type: string }

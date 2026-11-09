@@ -1,0 +1,196 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_source": "insomnia.desktop.app:v8",
+  "resources": [
+    {
+      "_id": "wrk_eatcloud_pbapi",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "EatCloud · API pública de donaciones",
+      "description": "Generado desde openapi.yaml",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_eatcloud_pbapi",
+      "name": "Base",
+      "data": {
+        "Cua_Master": "abaco",
+        "Cua_User": "isimo",
+        "usuario": "",
+        "contrasena": ""
+      }
+    },
+    {
+      "_id": "env_dev",
+      "_type": "environment",
+      "parentId": "env_base",
+      "name": "Desarrollo",
+      "data": {
+        "URL_donantes": "https://devdonantes.eatcloud.info"
+      }
+    },
+    {
+      "_id": "env_prd",
+      "_type": "environment",
+      "parentId": "env_base",
+      "name": "Producción",
+      "data": {
+        "URL_donantes": "https://donantes.eatcloud.info"
+      }
+    },
+    {
+      "_id": "fld_1",
+      "_type": "request_group",
+      "parentId": "wrk_eatcloud_pbapi",
+      "name": "Creación de donaciones",
+      "description": "Crear anuncios de donación con uno o varios productos."
+    },
+    {
+      "_id": "req_1",
+      "_type": "request",
+      "parentId": "fld_1",
+      "name": "Crear anuncio de donación — Campos obligatorios",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Crea un anuncio de donación con uno o varios productos (`_data`) de un mismo punto de donación.\n\n**Qué revisar en la respuesta exitosa:**\n\n| Bloque | Condición de éxito |\n|---|---|\n| Encabezado (`encabezado`) | `op = true` y `cont > 0` |\n| Detalles (`detalles`) | `op = true` y `cont > 0` |\n| Match (`encabezado._match.match[0]`) | `op = true` y `cont > 0` |\n\n**Nota:** si el `cont` del match es 0, el anuncio se crea pero **no es visible para los beneficiarios**.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"create_donation\",\n  \"_data\": [\n    {\n      \"eatc-pod_id\": \"I08\",\n      \"eatc-odd_id\": \"3\",\n      \"eatc-odd_name\": \"AJO EN POLVO 28 G\",\n      \"eatc-odd_original_quantity\": \"7\",\n      \"eatc-odd_unit_weight_kg\": \"0.028\",\n      \"eatc-unit_cost\": \"9334\",\n      \"eatc-VAT_percentage\": \"5\",\n      \"eatc_closer_expiration_date\": \"2026-10-23\"\n    },\n    {\n      \"eatc-pod_id\": \"I08\",\n      \"eatc-odd_id\": \"4\",\n      \"eatc-odd_name\": \"ALAS ADOBADAS 750 G\",\n      \"eatc-odd_original_quantity\": \"5\",\n      \"eatc-odd_unit_weight_kg\": \"0.75\",\n      \"eatc-unit_cost\": \"1\",\n      \"eatc-VAT_percentage\": \"0\",\n      \"eatc_closer_expiration_date\": \"2026-10-23\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_2",
+      "_type": "request",
+      "parentId": "fld_1",
+      "name": "Crear anuncio de donación — Todos los campos",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Crea un anuncio de donación con uno o varios productos (`_data`) de un mismo punto de donación.\n\n**Qué revisar en la respuesta exitosa:**\n\n| Bloque | Condición de éxito |\n|---|---|\n| Encabezado (`encabezado`) | `op = true` y `cont > 0` |\n| Detalles (`detalles`) | `op = true` y `cont > 0` |\n| Match (`encabezado._match.match[0]`) | `op = true` y `cont > 0` |\n\n**Nota:** si el `cont` del match es 0, el anuncio se crea pero **no es visible para los beneficiarios**.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"create_donation\",\n  \"eatc-dona_header_code\": \"isimoI0820260131202524\",\n  \"eatc-doc\": \"52730283000\",\n  \"_data\": [\n    {\n      \"eatc-pod_id\": \"I08\",\n      \"eatc-odd_id\": \"3\",\n      \"eatc-odd_name\": \"AJO EN POLVO 28 G\",\n      \"eatc-odd_original_quantity\": \"7\",\n      \"eatc-odd_unit_weight_kg\": \"0.028\",\n      \"eatc-unit_cost\": \"1\",\n      \"eatc-VAT_percentage\": \"0\",\n      \"origin_odds_typology_a\": \"ta\",\n      \"origin_odds_typology_b\": \"tb\",\n      \"origin_odds_typology_c\": \"tc\",\n      \"eatc_lote\": \"\",\n      \"eatc_closer_expiration_date\": \"2026-10-23\"\n    },\n    {\n      \"eatc-pod_id\": \"I08\",\n      \"eatc-odd_id\": \"4\",\n      \"eatc-odd_name\": \"ALAS ADOBADAS 750 G\",\n      \"eatc-odd_original_quantity\": \"5\",\n      \"eatc-odd_unit_weight_kg\": \"0.75\",\n      \"eatc-unit_cost\": \"1\",\n      \"eatc-VAT_percentage\": \"0\",\n      \"origin_odds_typology_a\": \"ta2\",\n      \"origin_odds_typology_b\": \"tb2\",\n      \"origin_odds_typology_c\": \"tc2\",\n      \"eatc_lote\": \"\",\n      \"eatc_closer_expiration_date\": \"2026-03-10\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 2
+    },
+    {
+      "_id": "fld_2",
+      "_type": "request_group",
+      "parentId": "wrk_eatcloud_pbapi",
+      "name": "Consulta de donaciones",
+      "description": "Consultar donaciones según su estado de gestión, por rango de fechas o por código."
+    },
+    {
+      "_id": "req_3",
+      "_type": "request",
+      "parentId": "fld_2",
+      "name": "Consultar donaciones por estado de gestión — Por rango de fechas",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | Recibido, Pre-certificado, Certificado |\n| `gestion_no_exitosa` | Cancelado, No entregado |\n| `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |\n\n**Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios\ncódigos de donación en `eatc-code`.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"fecha_inicial\": \"2022-01-01\",\n      \"fecha_final\": \"2024-11-01\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_4",
+      "_type": "request",
+      "parentId": "fld_2",
+      "name": "Consultar donaciones por estado de gestión — Por código de donación",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | Recibido, Pre-certificado, Certificado |\n| `gestion_no_exitosa` | Cancelado, No entregado |\n| `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |\n\n**Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios\ncódigos de donación en `eatc-code`.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"eatc-code\": \"isimoI0820260131202524\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 4
+    },
+    {
+      "_id": "fld_3",
+      "_type": "request_group",
+      "parentId": "wrk_eatcloud_pbapi",
+      "name": "Verificación de gestión",
+      "description": "Comprobar con el código de verificación que una donación programada fue gestionada por el recolector."
+    },
+    {
+      "_id": "req_5",
+      "_type": "request",
+      "parentId": "fld_3",
+      "name": "Verificar código de gestión",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Permite al donante comprobar, con el código de verificación, que una donación\nprogramada (`scheduled`) fue gestionada correctamente por el recolector.\n\nAmbos campos de `_data` son obligatorios. Si falta alguno, la API responde\n`incomplete_data:<campo>`.\n\n**Respuestas posibles:**\n\n| Caso | `ok` | `message` |\n|---|---|---|\n| Donación gestionada correctamente | `true` | `dona_management_verification_code_OK` |\n| La donación no existe, no está en `scheduled` o el código es incorrecto | `false` | `donation_scheduled_does_not_exist_or_incorret_ver_code` |\n| La donación no quedó en estado `delivered` o `received` | `false` | `error_dona_management_verification_code` |\n| Error interno del servicio de verificación | `false` | `error_activepieces_no_response` |\n\nEn todos los casos `data` incluye `ambiente`, `cua_master`, `fecha_hora` y `codigo_donacion`.\nEn caso de éxito incluye además: placa, recolector y su documento de identidad, `POD_id`,\nbeneficiario, `estado_donacion`, `estado3_donacion` y fecha programada de recolección.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"gestion_verificar_codigo\",\n  \"_data\": [\n    {\n      \"codigo_donacion\": \"00002601054047\",\n      \"codigo_verificacion\": \"7309875EDK153\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 5
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EatCloud · API pública de donaciones</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <style>
+    body { margin: 0; background: #fafafa; }
+    .ec-bar { background: #1f7a4d; color: #fff; padding: 14px 24px; font: 600 18px/1.3 system-ui, sans-serif; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .ec-bar a { color: #fff; font-weight: 400; font-size: 14px; }
+    .swagger-ui .topbar { display: none; }
+    #ec-error { display: none; max-width: 760px; margin: 40px auto; font: 15px/1.5 system-ui, sans-serif; padding: 16px; border: 1px solid #e0b4b4; background: #fff6f6; }
+  </style>
+</head>
+<body>
+  <div class="ec-bar">
+    <span>EatCloud · API pública de donaciones</span>
+    <a href="openapi.yaml" download>Descargar openapi.yaml (importable en Insomnia o Postman)</a>
+  </div>
+  <div id="ec-error">
+    No se pudo cargar <code>openapi.yaml</code>. Si abrió este archivo con doble clic desde su computador,
+    el navegador bloquea la lectura; ábralo desde la URL publicada en GitHub Pages.
+  </div>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.addEventListener('load', function () {
+      SwaggerUIBundle({
+        url: 'openapi.yaml',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        docExpansion: 'list',
+        defaultModelsExpandDepth: 0,
+        tryItOutEnabled: false,
+        supportedSubmitMethods: [],
+        onComplete: function () {},
+        onFailure: function () { document.getElementById('ec-error').style.display = 'block'; }
+      });
+      fetch('openapi.yaml', { method: 'HEAD' }).catch(function () {
+        document.getElementById('ec-error').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
