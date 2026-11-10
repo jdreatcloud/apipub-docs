@@ -60,3 +60,4 @@ La operación se indica con el campo `_operation` del body: `create_donation`, `
 | Versión | Fecha | Cambios |
 |---|---|---|
 | 3.0.0 | 2026-11-09 | Primera publicación: creación, consulta y verificación de código de gestión. |
+| 3.1.0 | 2026-11-09 | Gestión de donaciones: nuevo filtro por fecha de recepción (`received_fecha_inicial` / `received_fecha_final`, solo `gestion_exitosa`), reglas de rangos (máx. 31 días), nuevo campo `received_state_datetime` en la respuesta y descripciones ampliadas de `receipt_datetime` y `code_verification_datetime`. `eatc_closer_expiration_date` pasa a ser opcional. |
