@@ -104,20 +104,20 @@
       "_id": "fld_2",
       "_type": "request_group",
       "parentId": "wrk_eatcloud_pbapi",
-      "name": "Consulta de donaciones",
-      "description": "Consultar donaciones según su estado de gestión, por rango de fechas o por código."
+      "name": "Gestión de donaciones",
+      "description": "Consultar donaciones según su estado de gestión, por rango de fechas (de publicación o de recepción) o por código."
     },
     {
       "_id": "req_3",
       "_type": "request",
       "parentId": "fld_2",
-      "name": "Consultar donaciones por estado de gestión — Por rango de fechas",
+      "name": "Consultar donaciones por estado de gestión — Por fecha de publicación",
       "method": "POST",
       "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
-      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | Recibido, Pre-certificado, Certificado |\n| `gestion_no_exitosa` | Cancelado, No entregado |\n| `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |\n\n**Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios\ncódigos de donación en `eatc-code`.\n",
+      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | recibida, pre-certificada, certificada |\n| `gestion_no_exitosa` | cancelada, no_entregada |\n| `gestion_pendiente` | anunciada, adjudicada, programada, despachada |\n\n**Filtros disponibles** (se envían dentro de `_data`):\n\n| Filtro | Campos | Filtra por | Aplica a |\n|---|---|---|---|\n| Por fecha de publicación | `fecha_inicial` y `fecha_final` | `publication_date` | Todas las operaciones |\n| Por fecha de recepción | `received_fecha_inicial` y `received_fecha_final` | `received_state_datetime` (cuando la donación pasó a recibida) | Solo `gestion_exitosa` |\n| Por código | `eatc-code` | Código de la donación | Todas las operaciones |\n\n**Reglas:**\n- Use **uno** de los dos rangos de fechas. Si se envían ambos, solo se aplica `received_fecha_*`.\n- Cada rango debe enviarse **completo** (fecha inicial y final).\n- Un rango **no puede superar 31 días**, y la fecha inicial no puede ser mayor que la final.\n- Si se envía `eatc-code`, las fechas se ignoran.\n",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"fecha_inicial\": \"2022-01-01\",\n      \"fecha_final\": \"2024-11-01\"\n    }\n  ]\n}"
+        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"fecha_inicial\": \"2026-10-01\",\n      \"fecha_final\": \"2026-10-31\"\n    }\n  ]\n}"
       },
       "headers": [
         {
@@ -137,13 +137,13 @@
       "_id": "req_4",
       "_type": "request",
       "parentId": "fld_2",
-      "name": "Consultar donaciones por estado de gestión — Por código de donación",
+      "name": "Consultar donaciones por estado de gestión — Por fecha de recepción (solo gestion_exitosa)",
       "method": "POST",
       "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
-      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | Recibido, Pre-certificado, Certificado |\n| `gestion_no_exitosa` | Cancelado, No entregado |\n| `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |\n\n**Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios\ncódigos de donación en `eatc-code`.\n",
+      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | recibida, pre-certificada, certificada |\n| `gestion_no_exitosa` | cancelada, no_entregada |\n| `gestion_pendiente` | anunciada, adjudicada, programada, despachada |\n\n**Filtros disponibles** (se envían dentro de `_data`):\n\n| Filtro | Campos | Filtra por | Aplica a |\n|---|---|---|---|\n| Por fecha de publicación | `fecha_inicial` y `fecha_final` | `publication_date` | Todas las operaciones |\n| Por fecha de recepción | `received_fecha_inicial` y `received_fecha_final` | `received_state_datetime` (cuando la donación pasó a recibida) | Solo `gestion_exitosa` |\n| Por código | `eatc-code` | Código de la donación | Todas las operaciones |\n\n**Reglas:**\n- Use **uno** de los dos rangos de fechas. Si se envían ambos, solo se aplica `received_fecha_*`.\n- Cada rango debe enviarse **completo** (fecha inicial y final).\n- Un rango **no puede superar 31 días**, y la fecha inicial no puede ser mayor que la final.\n- Si se envía `eatc-code`, las fechas se ignoran.\n",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"eatc-code\": \"isimoI0820260131202524\"\n    }\n  ]\n}"
+        "text": "{\n  \"_operation\": \"gestion_exitosa\",\n  \"_data\": [\n    {\n      \"received_fecha_inicial\": \"2025-03-05\",\n      \"received_fecha_final\": \"2025-03-05\"\n    }\n  ]\n}"
       },
       "headers": [
         {
@@ -160,6 +160,32 @@
       "metaSortKey": 4
     },
     {
+      "_id": "req_5",
+      "_type": "request",
+      "parentId": "fld_2",
+      "name": "Consultar donaciones por estado de gestión — Por código de donación",
+      "method": "POST",
+      "url": "{{ _.URL_donantes }}/pbapi/{{ _.Cua_Master }}/{{ _.Cua_User }}",
+      "description": "Devuelve las donaciones con sus encabezados y detalles. Permite comparar lo\nreportado por el donante con lo verificado por el beneficiario:\n`odd_original_quantity` vs `odd_quantity`, `original_weight_kg` vs `total_weight_kg`\ny `original_cost` vs `total_cost`.\n\n**Valores de `_operation` y estados que devuelve cada uno:**\n\n| `_operation` | Estados incluidos |\n|---|---|\n| `gestion_exitosa` | recibida, pre-certificada, certificada |\n| `gestion_no_exitosa` | cancelada, no_entregada |\n| `gestion_pendiente` | anunciada, adjudicada, programada, despachada |\n\n**Filtros disponibles** (se envían dentro de `_data`):\n\n| Filtro | Campos | Filtra por | Aplica a |\n|---|---|---|---|\n| Por fecha de publicación | `fecha_inicial` y `fecha_final` | `publication_date` | Todas las operaciones |\n| Por fecha de recepción | `received_fecha_inicial` y `received_fecha_final` | `received_state_datetime` (cuando la donación pasó a recibida) | Solo `gestion_exitosa` |\n| Por código | `eatc-code` | Código de la donación | Todas las operaciones |\n\n**Reglas:**\n- Use **uno** de los dos rangos de fechas. Si se envían ambos, solo se aplica `received_fecha_*`.\n- Cada rango debe enviarse **completo** (fecha inicial y final).\n- Un rango **no puede superar 31 días**, y la fecha inicial no puede ser mayor que la final.\n- Si se envía `eatc-code`, las fechas se ignoran.\n",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"_operation\": \"gestion_pendiente\",\n  \"_data\": [\n    {\n      \"eatc-code\": \"isimoI0820260131202524\"\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "username": "{{ _.usuario }}",
+        "password": "{{ _.contrasena }}",
+        "disabled": false
+      },
+      "metaSortKey": 5
+    },
+    {
       "_id": "fld_3",
       "_type": "request_group",
       "parentId": "wrk_eatcloud_pbapi",
@@ -167,7 +193,7 @@
       "description": "Comprobar con el código de verificación que una donación programada fue gestionada por el recolector."
     },
     {
-      "_id": "req_5",
+      "_id": "req_6",
       "_type": "request",
       "parentId": "fld_3",
       "name": "Verificar código de gestión",
@@ -190,7 +216,7 @@
         "password": "{{ _.contrasena }}",
         "disabled": false
       },
-      "metaSortKey": 5
+      "metaSortKey": 6
     }
   ]
 }
