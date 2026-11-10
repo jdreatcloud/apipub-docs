@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: EatCloud · API pública de donaciones (pbapi)
-  version: "3.0.0"
+  version: "3.1.0"
   description: |
     API para **crear anuncios de donación** y **consultar su gestión** en EatCloud,
     para una cuenta usuario (`cua_user`) vinculada a una cuenta maestra (`cua_master`).
@@ -57,8 +57,8 @@ security:
 tags:
   - name: Creación de donaciones
     description: Crear anuncios de donación con uno o varios productos.
-  - name: Consulta de donaciones
-    description: Consultar donaciones según su estado de gestión, por rango de fechas o por código.
+  - name: Gestión de donaciones
+    description: Consultar donaciones según su estado de gestión, por rango de fechas (de publicación o de recepción) o por código.
   - name: Verificación de gestión
     description: Comprobar con el código de verificación que una donación programada fue gestionada por el recolector.
 
@@ -235,7 +235,7 @@ paths:
 
   /{cua_master}/{cua_user}#consulta:
     post:
-      tags: [Consulta de donaciones]
+      tags: [Gestión de donaciones]
       operationId: consultar_donaciones
       summary: Consultar donaciones por estado de gestión
       description: |
@@ -248,12 +248,23 @@ paths:
 
         | `_operation` | Estados incluidos |
         |---|---|
-        | `gestion_exitosa` | Recibido, Pre-certificado, Certificado |
-        | `gestion_no_exitosa` | Cancelado, No entregado |
-        | `gestion_pendiente` | Anunciado, Adjudicado, Programado, Despachado |
+        | `gestion_exitosa` | recibida, pre-certificada, certificada |
+        | `gestion_no_exitosa` | cancelada, no_entregada |
+        | `gestion_pendiente` | anunciada, adjudicada, programada, despachada |
 
-        **Filtro:** envíe un rango de fechas (`fecha_inicial` y `fecha_final`) **o** uno o varios
-        códigos de donación en `eatc-code`.
+        **Filtros disponibles** (se envían dentro de `_data`):
+
+        | Filtro | Campos | Filtra por | Aplica a |
+        |---|---|---|---|
+        | Por fecha de publicación | `fecha_inicial` y `fecha_final` | `publication_date` | Todas las operaciones |
+        | Por fecha de recepción | `received_fecha_inicial` y `received_fecha_final` | `received_state_datetime` (cuando la donación pasó a recibida) | Solo `gestion_exitosa` |
+        | Por código | `eatc-code` | Código de la donación | Todas las operaciones |
+
+        **Reglas:**
+        - Use **uno** de los dos rangos de fechas. Si se envían ambos, solo se aplica `received_fecha_*`.
+        - Cada rango debe enviarse **completo** (fecha inicial y final).
+        - Un rango **no puede superar 31 días**, y la fecha inicial no puede ser mayor que la final.
+        - Si se envía `eatc-code`, las fechas se ignoran.
       parameters:
         - $ref: '#/components/parameters/cua_master'
         - $ref: '#/components/parameters/cua_user'
@@ -265,12 +276,19 @@ paths:
               $ref: '#/components/schemas/ConsultaRequest'
             examples:
               por_fechas:
-                summary: Por rango de fechas
+                summary: Por fecha de publicación
                 value:
                   _operation: gestion_pendiente
                   _data:
-                    - fecha_inicial: "2022-01-01"
-                      fecha_final: "2024-11-01"
+                    - fecha_inicial: "2026-10-01"
+                      fecha_final: "2026-10-31"
+              por_fecha_recepcion:
+                summary: Por fecha de recepción (solo gestion_exitosa)
+                value:
+                  _operation: gestion_exitosa
+                  _data:
+                    - received_fecha_inicial: "2025-03-05"
+                      received_fecha_final: "2025-03-05"
               por_codigo:
                 summary: Por código de donación
                 value:
@@ -284,30 +302,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultaResponse'
-              example:
-                res:
-                  - code: "isimoI0820260131202524"
-                    original_weight_kg: "3.946"
-                    original_cost: "65343"
-                    total_weight_kg: "3.946"
-                    total_cost: "65343"
-                    doc: "52730283000"
-                    state: "announced"
-                    publication_date: "2026-10-20"
-                    publication_datetime: "2026-10-20 21:50:20"
-                    pod_id: "I08"
-                    pod_name: "CALASANZ MEDELLIN "
-                    receipt_datetime: "0000-00-00 00:00:00"
-                    code_verification_datetime: "0000-00-00 00:00:00"
-                    donation_manager_code: ""
-                    donation_manager_name: ""
-                    detalles:
-                      - unit_cost: "9334"
-                        odd_original_quantity: "7"
-                        odd_quantity: "7"
-                        odd_name: "AJO EN POLVO 28 G"
-                        odd_id: "3"
-                        odd_unit_weight_kg: "0.028"
+              examples:
+                pendiente:
+                  summary: Donación pendiente (anunciada)
+                  value:
+                    res:
+                      - code: "isimoI0820260131202524"
+                        original_weight_kg: "3.946"
+                        original_cost: "65343"
+                        total_weight_kg: "3.946"
+                        total_cost: "65343"
+                        doc: "52730283000"
+                        state: "announced"
+                        publication_date: "2026-10-20"
+                        publication_datetime: "2026-10-20 21:50:20"
+                        pod_id: "I08"
+                        pod_name: "CALASANZ MEDELLIN "
+                        receipt_datetime: "0000-00-00 00:00:00"
+                        code_verification_datetime: "0000-00-00 00:00:00"
+                        received_state_datetime: "0000-00-00 00:00:00"
+                        donation_manager_code: ""
+                        donation_manager_name: ""
+                        detalles:
+                          - unit_cost: "9334"
+                            odd_original_quantity: "7"
+                            odd_quantity: "7"
+                            odd_name: "AJO EN POLVO 28 G"
+                            odd_id: "3"
+                            odd_unit_weight_kg: "0.028"
+                exitosa:
+                  summary: Donación recibida (consulta por fecha de recepción)
+                  value:
+                    res:
+                      - code: "isimoq2720250304203112"
+                        original_weight_kg: "7.82"
+                        original_cost: "22"
+                        total_weight_kg: "7.82"
+                        total_cost: "22"
+                        doc: ""
+                        state: "received"
+                        publication_date: "2025-03-04"
+                        publication_datetime: "2025-03-04 20:31:13"
+                        pod_id: "q27"
+                        pod_name: "CARTAGENA TERNERA"
+                        receipt_datetime: "2025-03-04 21:03:59"
+                        code_verification_datetime: "2025-03-05 11:18:46"
+                        received_state_datetime: "2025-03-05 11:18:46"
+                        donation_manager_code: "900000000"
+                        donation_manager_name: "FUNDACIÓN BENEFICIARIA"
+                        detalles:
+                          - unit_cost: "1"
+                            odd_original_quantity: "1"
+                            odd_quantity: "1"
+                            odd_name: "PLATANO UND"
+                            odd_id: "1601:N/A"
+                            odd_unit_weight_kg: "0.375"
         "400":
           description: "La petición no se procesó (`op: false`). Errores de autenticación iguales a los de creación."
           content:
@@ -551,11 +600,19 @@ components:
               fecha_inicial:
                 type: string
                 format: date
-                description: Fecha inicial `AAAA-MM-DD`. Obligatoria si no se envía `eatc-code`.
+                description: Fecha inicial `AAAA-MM-DD`. Filtra por la fecha de publicación de la donación (`publication_date`). Obligatoria si no se envía `eatc-code` ni el rango `received_fecha_*`.
               fecha_final:
                 type: string
                 format: date
-                description: Fecha final `AAAA-MM-DD`. Obligatoria si no se envía `eatc-code`.
+                description: Fecha final `AAAA-MM-DD`. Filtra por la fecha de publicación de la donación (`publication_date`). Obligatoria si no se envía `eatc-code` ni el rango `received_fecha_*`.
+              received_fecha_inicial:
+                type: string
+                format: date
+                description: "Opcional. Fecha inicial `AAAA-MM-DD`. Filtra por la fecha en que la donación pasó a recibida (`received_state_datetime`). Solo aplica a `gestion_exitosa`. Alternativa a `fecha_inicial`/`fecha_final`; si se envía, debe enviarse también `received_fecha_final`."
+              received_fecha_final:
+                type: string
+                format: date
+                description: "Opcional. Fecha final `AAAA-MM-DD`. Filtra por la fecha en que la donación pasó a recibida (`received_state_datetime`). Solo aplica a `gestion_exitosa`. Se envía junto con `received_fecha_inicial`."
               eatc-code:
                 type: string
                 description: Uno o varios códigos de donación separados por coma. Obligatorio si no se envía el rango de fechas.
@@ -582,8 +639,9 @@ components:
         publication_datetime: { type: string, description: Fecha y hora exactas de publicación. }
         pod_id: { type: string, description: Código del punto de donación. }
         pod_name: { type: string, description: Nombre del punto de donación. }
-        receipt_datetime: { type: string, description: "Fecha y hora en que el beneficiario recibió la donación (`0000-00-00 00:00:00` si aún no)." }
-        code_verification_datetime: { type: string, description: Fecha y hora en que se verificó el código de entrega. }
+        receipt_datetime: { type: string, description: "Fecha y hora en que el beneficiario recibió la donación. Si es diferente de `0000-00-00 00:00:00`, el beneficiario realizó la verificación detallada de la donación." }
+        code_verification_datetime: { type: string, description: "Fecha y hora en que se verificó el código de entrega. Si es diferente de `0000-00-00 00:00:00`, el punto de donación validó el código de recogida que presenta el beneficiario al recibir la donación." }
+        received_state_datetime: { type: string, description: Fecha y hora en que la donación fue marcada como recibida. }
         donation_manager_code: { type: string, description: Código del gestor/beneficiario que gestiona o recoge la donación. }
         donation_manager_name: { type: string, description: Nombre del gestor/beneficiario. }
         detalles:
